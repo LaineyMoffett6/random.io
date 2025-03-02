@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Maker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #ffd1dc;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            background: white;
+            padding: 20px;
+            width: 800px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+        .left, .right {
+            width: 50%;
+            padding: 10px;
+        }
+        .left {
+            border-right: 2px solid #ffe4e1;
+        }
+        h2 {
+            color: #ffb6c1;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #ffb6c1;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #ff6b81;
+        }
+        .qualities-list {
+            margin-top: 10px;
+        }
+        .qualities-list label {
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #ff4b5c;
+        }
+        /* Heart Confetti Animation */
+        .heart {
+            position: absolute;
+            color: red;
+            font-size: 20px;
+            animation: fall 3s linear forwards;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10px) scale(1); opacity: 1; }
+            100% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Left Side: User Defines Their Ideal Match -->
+    <div class="left">
+        <h2>Define Your Ideal Match</h2>
+        <label>What qualities do you value? (Comma separated)</label>
+        <input type="text" id="qualities" placeholder="Loyal, Funny, Crazy">
+        
+        <label>What physical features do you like? (Comma separated)</label>
+        <input type="text" id="looks" placeholder="Tall, Dark, Handsome">
+
+        <label>What personality traits do you prefer? (Comma separated)</label>
+        <input type="text" id="personality" placeholder="Outgoing, Kind, Emo">
+
+        <button onclick="generateList()">Generate Match List</button>
+    </div>
+
+    <!-- Right Side: User Matches Their Person of Interest -->
+    <div class="right">
+        <h2>Does Your Person Match?</h2>
+        <div id="matchList" class="qualities-list hidden"></div>
+        <button id="calculateBtn" class="hidden" onclick="calculateMatch()">Calculate Match</button>
+        <p id="result"></p>
+    </div>
+</div>
+
+<script>
+    function generateList() {
+        let qualities = document.getElementById("qualities").value.split(",");
+        let looks = document.getElementById("looks").value.split(",");
+        let personality = document.getElementById("personality").value.split(",");
+
+        let allTraits = [...qualities, ...looks, ...personality].map(trait => trait.trim()).filter(trait => trait !== "");
+
+        if (allTraits.length === 0) {
+            alert("Please enter at least one trait!");
+            return;
+        }
+
+        let matchListDiv = document.getElementById("matchList");
+        matchListDiv.innerHTML = ""; // Clear previous entries
+        matchListDiv.classList.remove("hidden");
+
+        allTraits.forEach(trait => {
+            let label = document.createElement("label");
+            label.innerHTML = `<input type="checkbox" class="trait-checkbox" value="${trait}"> ${trait}`;
+            matchListDiv.appendChild(label);
+        });
+
+        document.getElementById("calculateBtn").classList.remove("hidden");
+    }
+
+    function calculateMatch() {
+        let checkboxes = document.querySelectorAll(".trait-checkbox");
+        let totalTraits = checkboxes.length;
+        let matchedTraits = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+        if (totalTraits === 0) {
+            alert("No traits to compare! Please define your ideal match first.");
+            return;
+        }
+
+        let matchPercentage = Math.round((matchedTraits / totalTraits) * 100);
+        let resultText = `Match Score: ${matchPercentage}%`;
+
+        let message = "";
+        if (matchPercentage > 80) {
+            message = "Perfect match! Get married or smthn";
+        } else if (matchPercentage > 60) {
+            message = "You two are pretty compatible!";
+        } else if (matchPercentage > 40) {
+            message = "Some similarities, but needs more";
+        } else {
+            message = "Maybe you should just be friends....";
+        }
+
+        document.getElementById("result").innerHTML = `${resultText}<br>${message}`;
+
+        if (matchPercentage > 75) {
+            createHeartConfetti();
+        }
+    }
+
+    function createHeartConfetti() {
+        for (let i = 0; i < 30; i++) {
+            let heart = document.createElement("div");
+            heart.innerHTML = "❤️";
+            heart.classList.add("heart");
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.animationDuration = (Math.random() * 2 + 1) + "s";
+            heart.style.fontSize = Math.random() * 20 + 10 + "px";
+
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 3000); // Remove hearts after animation
+        }
+    }
+</script>
+
+</body>
+</html>
